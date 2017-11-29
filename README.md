@@ -28,11 +28,11 @@ $ blastn -query rice.cds -db Bd.cds -out rice_vs_Sb.blast.out -evalue 0.001 -out
 ```
 > Remove blast hits with identity < 60% and coverage < 80%  
 ```
-$ blastn_parse.pl -i rice_vs_Bd.blast.out -o Erice_vs_Bd.blast.out -q ../4_rice_alleles/T2/riceT2.cds.fasta -b 1 -c 0.6 -d 0.8 
+$ blastn_parse.pl -i rice_vs_Bd.blast.out -o Erice_vs_Bd.blast.out -q rice.cds.fasta -b 1 -c 0.6 -d 0.8 
 ```
 > Classify alleles based on BLAST results
 ```
-$ classify -i Eblast.out -p 2 -r Bdistachyon_314_v3.1.gene.gff3 -g riceT2.gff3   
+$ classify -i Erice_vs_Bd.blast.out -p 2 -r Bdistachyon_314_v3.1.gene.gff3 -g riceT2.gff3   
 ```
 > After running the scripts above, two tables will be genrated. Allele.gene.table lists the allelic genes in the order of diplod refernece genome and Allele.ctg.table lists corresponding contig names in the same order.   
 
