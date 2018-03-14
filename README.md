@@ -1,16 +1,24 @@
 # ALLHiC
 A package to scaffolding polyploidy or heterozygosis genome using Hi-C data 
 
-## Introduction
-    
 
-### Algorithm demo  
+### Introduction  
+The major problem of scaffolding polyploid genome is that Hi-C signals are frequently detected between allelic haplotypes and any existing stat of art Hi-C scaffolding program  links the allelic haplotypes together. To solve the problem, we developed a new Hi-C scaffolding pipeline, called ALLHIC, specifically tailored to the highly heterozygous diploids or polyploid genomes. ALLHIC pipeline contains a total of 4 steps: prune, partition, optimize and build. 
 
-
-### Citation
-    
 
 ### Installation
+    $ git clone https://github.com/tangerzhang/ALLHiC
+    $ cd ALLHiC
+    $ chown -R bin/*
+    $ cp bin/* ~/bin
+
+### Dependencies
+Following is a list of thirty-party programs that will be used in ALLHIC pipeline.   
+- [samtools](http://samtools.sourceforge.net/)
+- [bedtools](http://bedtools.readthedocs.io/en/latest/)
+- [bwa](http://bio-bwa.sourceforge.net/)
+- [LACHESIS](https://github.com/shendurelab/LACHESIS)
+- NCBI blast+
 
 ### Running the pipeline
 
@@ -28,44 +36,62 @@ $ blastn -query rice.cds -db Bd.cds -out rice_vs_Sb.blast.out -evalue 0.001 -out
 ```
 > Remove blast hits with identity < 60% and coverage < 80%  
 ```
-$ blastn_parse.pl -i rice_vs_Bd.blast.out -o Erice_vs_Bd.blast.out -q rice.cds.fasta -b 1 -c 0.6 -d 0.8 
+blastn_parse.pl -i rice_vs_Bd.blast.out -o Erice_vs_Bd.blast.out -q ../4_rice_alleles/T2/riceT2.cds.fasta -b 1 -c 0.6 -d 0.8 
 ```
 > Classify alleles based on BLAST results
 ```
-$ classify.pl -i Erice_vs_Bd.blast.out -p 2 -r Bdistachyon_314_v3.1.gene.gff3 -g riceT2.gff3   
+classify.pl -i Eblast.out -p 2 -r Bdistachyon_314_v3.1.gene.gff3 -g riceT2.gff3   
 ```
 > After running the scripts above, two tables will be genrated. Allele.gene.table lists the allelic genes in the order of diplod refernece genome and Allele.ctg.table lists corresponding contig names in the same order.   
 
 - **Map Hi-C reads to draft assembly** 
 > use bwa index and samtools faidx to index your draft genme assembly  
 ```
-$ bwa index -a bwtsw draft.asm.fasta  
-$ samtools faidx draft.asm.fasta  
+bwa index -a bwtsw draft.asm.fasta  
+samtools faidx draft.asm.fasta  
 ```
 > Aligning Hi-C reads to the draft assembly  
 ```
-$ bwa aln -t 24 draft.asm.fasta reads_R1.fastq.gz > sample_R1.sai  
-$ bwa aln -t 24 draft.asm.fasta reads_R2.fastq.gz > sample_R2.sai  
-$ bwa sampe draft.asm.fasta sample_R1.sai sample_R2.sai reads_R1.fastq.gz reads_R2.fastq.gz > sample.bwa_aln.sam  
+bwa aln -t 24 draft.asm.fasta reads_R1.fastq.gz > sample_R1.sai  
+bwa aln -t 24 draft.asm.fasta reads_R2.fastq.gz > sample_R2.sai  
+bwa sampe draft.asm.fasta sample_R1.sai sample_R2.sai reads_R1.fastq.gz reads_R2.fastq.gz > sample.bwa_aln.sam  
 ```
 > Filtering SAM file 
 ```
-$ PreprocessSAMs.pl sample.bwa_aln.sam draft.asm.fasta MBOI
-$ filterBAM_forHiC.pl sample.bwa_aln.REduced.paired_only.bam sample.clean.sam  
-$ samtools view -bt draft.asm.fasta.fai sample.clean.sam > sample.clean.bam  
+PreprocessSAMs.pl sample.bwa_aln.sam draft.asm.fasta MBOI
+perl ~/software/script/filterBAM_forHiC.pl sample.bwa_aln.REduced.paired_only.bam sample.clean.sam  
+samtools view -bt draft.asm.fasta.fai sample.clean.sam > sample.clean.bam  
 ```
 
-- **Prune BAM files**  
-> Next, we will used Allele.ctg.table to prune 1) signals that link alleles and 2) weak signals. 
+- **Prune**  
+> Next, we will used Allele.ctg.table to prune 1) signals that link alleles and 2) weak signals from BAM files
 ```  
-$ prunning.pl -i Allele.ctg.table -b bam.list -r draft.asm.fasta   
+prune.pl -i Allele.ctg.table -b bam.list -r draft.asm.fasta   
 ```
-- **Partion contigs and Hi-C reads into allele groups**
->And then use Allele.gene.table to partition contigs and prunning bam into allele groups.
+- **Partition**
+>Apply LACHESIS clustering algorthm to partition contig (require Lachesis installed)
 ```
-$ partition.pl -g Allele.gene.table -r draft.asm.fasta
+Lachesis conf.ini
 ```
 
-- **Optimize order and orientation**
-- **Chromosome linking**
-- **Postprocessing**
+- **Optimize**
+> ordering and orientation for each group
+```
+bam2CLM.pl -b sample.clean.bam -r draft.asm.fasta -d out/main_results/
+allhic optimize group0.clm
+allhic optimize group1.clm
+allhic optimize group2.clm
+...
+```
+- **Build**
+> convert tour format to fasta sequences and agp location file
+```
+tour2asm.pl draft.asm.fasta
+```
+> This step will output a list of superscaffolds and un-achored contigs. Check groups.asm.fasta file.
+
+### Sample data
+> Test data can be found in the following link:
+```
+https://pan.baidu.com/s/1_EW7N5qOgpa1hdn95LP26A
+```
