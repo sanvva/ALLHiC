@@ -9,7 +9,7 @@ The major problem of scaffolding polyploid genome is that Hi-C signals are frequ
 ### Installation
     $ git clone https://github.com/tangerzhang/ALLHiC
     $ cd ALLHiC
-    $ chown -R bin/*
+    $ chmod +x bin/*
     $ cp bin/* ~/bin
 
 ### Dependencies
@@ -95,3 +95,4 @@ tour2asm.pl draft.asm.fasta
 ```
 https://pan.baidu.com/s/1_EW7N5qOgpa1hdn95LP26A
 ```
+> Test data starts from cleaning bam files.
