@@ -36,7 +36,7 @@ $ blastn -query rice.cds -db Bd.cds -out rice_vs_Sb.blast.out -evalue 0.001 -out
 ```
 > Remove blast hits with identity < 60% and coverage < 80%  
 ```
-blastn_parse.pl -i rice_vs_Bd.blast.out -o Erice_vs_Bd.blast.out -q ../4_rice_alleles/T2/riceT2.cds.fasta -b 1 -c 0.6 -d 0.8 
+blastn_parse.pl -i rice_vs_Bd.blast.out -o Erice_vs_Bd.blast.out -q ../4_rice_alleles/T2/riceT2.cds.fasta -b 1 -c 0.8 -d 0.6 
 ```
 > Classify alleles based on BLAST results
 ```
