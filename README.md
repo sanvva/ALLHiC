@@ -94,5 +94,7 @@ tour2asm.pl draft.asm.fasta
 > Test data can be found in the following link:
 ```
 https://pan.baidu.com/s/1_EW7N5qOgpa1hdn95LP26A
+or
+https://www.dropbox.com/s/yk3o2hh7as0iz6y/sample_data.tar.gz?dl=0
 ```
 > Test data starts from cleaning bam files.
